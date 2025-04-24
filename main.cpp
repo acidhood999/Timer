@@ -32,7 +32,8 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     font.setPointSize(14);
     QApplication::setFont(font);
     //
-    line->setValidator(new QIntValidator(this));
+    QRegularExpressionValidator* validator = new QRegularExpressionValidator(QRegularExpression("^([1-9]|1[0-9]|2[0-4])$"), this);
+    line->setValidator(validator);
     //
     layout = new QGridLayout(widget);
     //

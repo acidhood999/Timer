@@ -23,11 +23,11 @@ private slots:
     
 
 private:
-    QWidget* widget;
-    QLineEdit* line;
-    QPushButton* btn1;
-    QGridLayout* layout;
+    QWidget* widget = nullptr;
+    QLineEdit* line = nullptr;
+    QPushButton* btn1 = nullptr;
+    QGridLayout* layout = nullptr;
     QString hours;
-    QMessageBox* msgBox; 
-    int converttime{};
+    QMessageBox* msgBox = nullptr;
+    int converttime = 0;
 };

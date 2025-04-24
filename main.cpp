@@ -87,4 +87,10 @@ void Timer::onClick()
     }
 }
 
-Timer::~Timer() {}
+Timer::~Timer()
+{
+    if (msgBox) 
+    {
+        delete msgBox;
+    }
+}

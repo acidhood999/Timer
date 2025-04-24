@@ -43,6 +43,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="file.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>

@@ -102,6 +102,9 @@
     <None Include="Timer.pro" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="file.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

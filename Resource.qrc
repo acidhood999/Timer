@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>x64/Release/icon_app.ico</file>
+    </qresource>
+</RCC>

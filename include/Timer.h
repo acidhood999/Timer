@@ -61,5 +61,6 @@ private:
     void settingsWindow(); 
     void initializationButton(const QFont& font);
     void saveAction();
+    void setAutorun(bool run);
     void updateStyles();
 };

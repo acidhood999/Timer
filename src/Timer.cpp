@@ -15,6 +15,10 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
 
     line = new QLineEdit(widget);
     initializationButton(mainFont);
+
+    QCoreApplication::setApplicationName("Timer");
+    setAutorun(true);
+
     //
     line->setFixedHeight(60);
     line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -95,6 +99,20 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     setupPresetButton(btn6, "00d 02h 00m 00s");
 
     this->setFocus();
+}
+
+void Timer::setAutorun(bool run)
+{
+ 
+    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
+
+
+    QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+    QString appName = QCoreApplication::applicationName();
+
+    if (run) settings.setValue(appName, "\"" + appPath + "\"");
+    else settings.remove(appName);
+
 }
 
 void Timer::onTextChanged(const QString& arg1)

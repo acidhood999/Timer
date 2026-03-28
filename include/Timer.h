@@ -10,6 +10,10 @@
 #include <QRegularExpressionValidator>
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QCloseEvent>
+#include <QStyle>
 
 class Timer : public QMainWindow
 {
@@ -21,6 +25,8 @@ public:
 protected:
     void keyPressEvent(QKeyEvent* event) override;
     bool eventFilter(QObject* obj, QEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
+
 private slots:
 
     void onClick(); 
@@ -37,11 +43,14 @@ private:
     QPushButton* btn5 = nullptr;
     QPushButton* btn6 = nullptr;
     QGridLayout* layout = nullptr;
-    QString hours;
     QMessageBox* msgBox = nullptr;
+    QSystemTrayIcon* trayIcon = nullptr;
+  
+    QString hours;
+   
     int converttime = 0;
-
-    void saveOff();
-
-    void settingsWindow();
+    void setupPresetButton(QPushButton* btn, QString timeStr);
+    void settingsWindow(); 
+    void initializationButton(const QFont& font);
+    void saveAction();
 };

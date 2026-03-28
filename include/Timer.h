@@ -26,6 +26,10 @@ private:
     QWidget* widget = nullptr;
     QLineEdit* line = nullptr;
     QPushButton* btn1 = nullptr;
+    QPushButton* btn2 = nullptr;
+    QPushButton* btn3 = nullptr;
+    QPushButton* btn4 = nullptr;
+    QPushButton* btn5 = nullptr;
     QGridLayout* layout = nullptr;
     QString hours;
     QMessageBox* msgBox = nullptr;

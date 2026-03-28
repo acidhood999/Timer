@@ -1,9 +1,11 @@
 # Qt Shutdown Timer
 
 A lightweight and stylish Windows desktop application built with C++ and Qt 6. It allows users to set a countdown timer to automatically shut down their PC.
+
 ![C++](https://img.shields.io/badge/Language-C%2B%2B-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
+
 ## Features
 
 * **Smart Shutdown:** Schedules a system shutdown using native Windows commands (`shutdown /s /t`).

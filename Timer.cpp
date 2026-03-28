@@ -1,24 +1,16 @@
 #include "Timer.h"
 #include <QtWidgets/QApplication>
 #include <iostream>
+#include <string>
 
 using namespace std;
-
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    Timer w;
-    a.setWindowIcon(QIcon("icon_app.ico"));
-    w.show();
-
-    return a.exec();
-}
 
 Timer::Timer(QWidget* parent) : QMainWindow(parent)
 {
     widget = new QWidget(this);
     setCentralWidget(widget);
     setFixedSize(200, 60);
+    setWindowIcon(QIcon("icon_app.ico"));
     //
     btn1 = new QPushButton("ON");
     btn1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -39,19 +31,15 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     //
     layout->setSpacing(5);
     //
-    layout->addWidget(line, 0, 0);  
-    layout->addWidget(btn1, 0, 1);   
+    layout->addWidget(line, 0, 0);
+    layout->addWidget(btn1, 0, 1);
     //
     layout->setColumnStretch(0, 1);
     //
-    line->setAlignment(Qt::AlignCenter);    
+    line->setAlignment(Qt::AlignCenter);
     //
     connect(btn1, &QPushButton::clicked, this, &Timer::onClick);
-    
 
- 
-   
-    
 
 }
 
@@ -59,7 +47,7 @@ void Timer::onClick()
 {
     if (btn1->text() == "ON")
     {
-        
+
         converttime = line->text().toInt();
         converttime = (converttime * 60) * 60;
         if (converttime != 0)
@@ -73,8 +61,8 @@ void Timer::onClick()
         }
         else
         {
-            msgBox = new QMessageBox;  
-            msgBox->setText("ERROR"); 
+            msgBox = new QMessageBox;
+            msgBox->setText("ERROR");
             msgBox->exec();
         }
 
@@ -90,7 +78,7 @@ void Timer::onClick()
 
 Timer::~Timer()
 {
-    if (msgBox) 
+    if (msgBox)
     {
         delete msgBox;
     }

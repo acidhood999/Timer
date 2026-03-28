@@ -19,8 +19,8 @@ public:
     ~Timer();
 private slots:
 
-    void onClick();
-    
+    void onClick(); 
+    void onTextChanged(const QString& arg1);
 
 private:
     QWidget* widget = nullptr;
@@ -30,4 +30,6 @@ private:
     QString hours;
     QMessageBox* msgBox = nullptr;
     int converttime = 0;
+
+    void settingsWindow();
 };

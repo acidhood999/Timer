@@ -28,7 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="src\Timer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{009F9A1E-E8C5-4FC2-9B0F-C8A49907E927}</ProjectGuid>

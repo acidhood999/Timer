@@ -9,6 +9,7 @@
 #include <QFont>
 #include <QRegularExpressionValidator>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 class Timer : public QMainWindow
 {
@@ -17,6 +18,8 @@ class Timer : public QMainWindow
 public:
     Timer(QWidget *parent = nullptr);
     ~Timer();
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
 private slots:
 
     void onClick(); 
@@ -31,6 +34,7 @@ private:
     QPushButton* btn3 = nullptr;
     QPushButton* btn4 = nullptr;
     QPushButton* btn5 = nullptr;
+    QPushButton* btn6 = nullptr;
     QGridLayout* layout = nullptr;
     QString hours;
     QMessageBox* msgBox = nullptr;

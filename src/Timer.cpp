@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QDateTime>
 
+
 using namespace std;
 
 Timer::Timer(QWidget* parent) : QMainWindow(parent)
@@ -28,14 +29,21 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     btn3 = new QPushButton("30m");
     btn3->setFixedWidth(50);
 
-    btn4 = new QPushButton("1h");
+    btn4 = new QPushButton("45m");
     btn4->setFixedWidth(50);
 
-    btn5 = new QPushButton("2h");
+
+    btn5 = new QPushButton("1h");
     btn5->setFixedWidth(50);
+
+    btn6 = new QPushButton("2h");
+    btn6->setFixedWidth(50);
+  
 
     line = new QLineEdit;
     line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    line->setReadOnly(true);
+    line->setFocusPolicy(Qt::NoFocus);
     //
 
     QSettings settings("acidhood", "Timer");
@@ -52,8 +60,8 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     else btn1->setText("ON");
 
     //
-    QFont font = QApplication::font();
-    font.setPointSize(14);
+    QFont font("Consolas", 14);
+
     line->setFont(font);
 
  
@@ -63,10 +71,16 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
         "border: 1px solid black;"
         "border-radius: 5px;"
         "padding: 2px 5px;"
+        "font-family: 'Consolas';"
         "}"
     );
 
+    QList<QPushButton*> allButtons = { btn1, btn2, btn3, btn4, btn5, btn6 };
 
+    for (QPushButton* b : allButtons) 
+    {
+        b->setFont(font);
+    }
 
 
     //
@@ -96,12 +110,13 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     layout = new QGridLayout(widget);
     layout->setSpacing(10);
 
-    layout->addWidget(group, 0, 0, 1, 4);
+    layout->addWidget(group, 0, 0, 1, 5);
 
     layout->addWidget(btn2, 1, 0);
     layout->addWidget(btn3, 1, 1);
     layout->addWidget(btn4, 1, 2);
     layout->addWidget(btn5, 1, 3);
+    layout->addWidget(btn6, 1, 4);
     layout->setColumnStretch(0, 1);
     //
     connect(line, &QLineEdit::textEdited, this, &Timer::onTextChanged);
@@ -109,30 +124,41 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
 
 
 
-
+    //
     connect(btn2, &QPushButton::clicked, this, [this]() 
     {
-        QString cmd = "shutdown /s /t " + QString::number(900);
-        if (system(cmd.toStdString().c_str()) == 0) saveOff();
-        else  QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+        line->setText("00d 00h 15m 00s");
+        if (btn1->text() == "OFF") system("shutdown /a");
+        onClick();
+        line->setText("00d 00h 00m 00s");
     });
     connect(btn3, &QPushButton::clicked, this, [this]() 
     {
-        QString cmd = "shutdown /s /t " + QString::number(1800);
-        if (system(cmd.toStdString().c_str()) == 0) saveOff();
-        else QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+        line->setText("00d 00h 30m 00s");
+        if (btn1->text() == "OFF") system("shutdown /a");
+        onClick();
+        line->setText("00d 00h 00m 00s");
     });
     connect(btn4, &QPushButton::clicked, this, [this]()
     {
-        QString cmd = "shutdown /s /t " + QString::number(3600);
-        if (system(cmd.toStdString().c_str()) == 0)  saveOff();
-        else QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+        line->setText("00d 00h 45m 00s");
+        if (btn1->text() == "OFF") system("shutdown /a");
+        onClick();
+        line->setText("00d 00h 00m 00s");
     });
     connect(btn5, &QPushButton::clicked, this, [this]() 
     {
-        QString cmd = "shutdown /s /t " + QString::number(7200);
-        if (system(cmd.toStdString().c_str()) == 0)   saveOff();
-        else QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+        line->setText("00d 01h 00m 00s");
+        if (btn1->text() == "OFF") system("shutdown /a");
+        onClick();
+        line->setText("00d 00h 00m 00s");
+    });
+    connect(btn6, &QPushButton::clicked, this, [this]()
+    {
+        line->setText("00d 02h 00m 00s");
+        if (btn1->text() == "OFF") system("shutdown /a");
+        onClick();
+        line->setText("00d 00h 00m 00s");
     });
 }
 
@@ -145,10 +171,6 @@ void Timer::onTextChanged(const QString& arg1)
     QString digits = arg1;
     digits.remove(QRegularExpression("\\D"));
     //
-    if (arg1.length() < 15 && digits.length() >= lastDigitsCount && digits.length() > 0)
-    {
-        digits.chop(1);
-    }
 
     //
     while (digits.startsWith('0') && digits.length() > 1)
@@ -204,6 +226,7 @@ void Timer::onClick()
                 btn1->setText("OFF");
                 settings.setValue("timerActive", true);
                 settings.setValue("lastTime", line->text());
+                line->setText("00d 00h 00m 00s");
             }
             else 
             {
@@ -225,8 +248,7 @@ void Timer::onClick()
     }
 }
 
-Timer::~Timer()
-{}
+
 
 void Timer::saveOff()
 {
@@ -241,3 +263,26 @@ void Timer::settingsWindow()
     setFixedSize(320, 150);
     setWindowTitle("Timer");
 }
+
+
+
+void Timer::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9)
+    {
+        QString currentText = line->text();
+        onTextChanged(currentText + event->text());
+    }
+    else if (event->key() == Qt::Key_Backspace) 
+    {
+        QString digits = line->text().remove(QRegularExpression("\\D"));
+        if (!digits.isEmpty())
+        {
+            digits.chop(1);
+            onTextChanged(digits);
+        }
+    }
+}
+
+Timer::~Timer()
+{}

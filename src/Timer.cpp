@@ -43,19 +43,32 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     line = new QLineEdit;
     line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     line->setReadOnly(true);
-    line->setFocusPolicy(Qt::NoFocus);
+    line->setFocusPolicy(Qt::StrongFocus);
+    line->installEventFilter(this);
+    line->setToolTip("Type numbers on your keyboard to set time");
     //
 
     QSettings settings("acidhood", "Timer");
-
-   
     bool isActive = settings.value("timerActive", false).toBool();
 
     if (isActive)
     {
-        btn1->setText("OFF");
-        QString savedTime = settings.value("lastTime", "00d 00h 00m 00s").toString();
-        line->setText(savedTime);
+       
+        QString deadlineStr = settings.value("deadline").toString();
+        QDateTime deadline = QDateTime::fromString(deadlineStr, Qt::ISODate);
+
+        if (deadline.isValid() && QDateTime::currentDateTime() < deadline)
+        {
+            btn1->setText("OFF");
+            QString savedTime = settings.value("lastTime", "00d 00h 00m 00s").toString();
+            line->setText(savedTime);
+        }
+        else
+        {
+            settings.setValue("timerActive", false);
+            btn1->setText("ON");
+            line->setText("00d 00h 00m 00s");
+        }
     }
     else btn1->setText("ON");
 
@@ -68,10 +81,19 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     line->setStyleSheet("border-bottom: none");
     line->setStyleSheet(
         "QLineEdit {"
-        "border: 1px solid black;"
-        "border-radius: 5px;"
-        "padding: 2px 5px;"
-        "font-family: 'Consolas';"
+        "  border: 1px solid #bdc3c7;"
+        "  border-radius: 5px;"
+        "  padding: 2px 5px;"
+        "  color: gray;"
+        "  font-family: 'Consolas';"
+        "  background: white;"
+        "}"
+        "QLineEdit:hover {"
+        "  border: 1px solid #95a5a6;"
+        "}"
+        "QLineEdit:focus {"
+        "  border: 2px solid #3498db;" // blue
+        "  color: black;"
         "}"
     );
 
@@ -80,6 +102,7 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     for (QPushButton* b : allButtons) 
     {
         b->setFont(font);
+        b->setFocusPolicy(Qt::NoFocus);
     }
 
 
@@ -130,36 +153,33 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
         line->setText("00d 00h 15m 00s");
         if (btn1->text() == "OFF") system("shutdown /a");
         onClick();
-        line->setText("00d 00h 00m 00s");
     });
     connect(btn3, &QPushButton::clicked, this, [this]() 
     {
         line->setText("00d 00h 30m 00s");
         if (btn1->text() == "OFF") system("shutdown /a");
         onClick();
-        line->setText("00d 00h 00m 00s");
     });
     connect(btn4, &QPushButton::clicked, this, [this]()
     {
         line->setText("00d 00h 45m 00s");
         if (btn1->text() == "OFF") system("shutdown /a");
         onClick();
-        line->setText("00d 00h 00m 00s");
     });
     connect(btn5, &QPushButton::clicked, this, [this]() 
     {
         line->setText("00d 01h 00m 00s");
         if (btn1->text() == "OFF") system("shutdown /a");
         onClick();
-        line->setText("00d 00h 00m 00s");
     });
     connect(btn6, &QPushButton::clicked, this, [this]()
     {
         line->setText("00d 02h 00m 00s");
         if (btn1->text() == "OFF") system("shutdown /a");
         onClick();
-        line->setText("00d 00h 00m 00s");
     });
+
+    this->setFocus();
 }
 
 
@@ -194,6 +214,8 @@ void Timer::onTextChanged(const QString& arg1)
     QString m = padded.mid(4, 2);
     QString s = padded.mid(6, 2);
 
+
+
     QString formatted = QString("%1d %2h %3m %4s").arg(d, h, m, s);
     //
     line->blockSignals(true);
@@ -224,8 +246,13 @@ void Timer::onClick()
             if (system(cmd.toStdString().c_str()) == 0) 
             {
                 btn1->setText("OFF");
+
+                QDateTime deadline = QDateTime::currentDateTime().addSecs(totalSeconds);
+
                 settings.setValue("timerActive", true);
+                settings.setValue("deadline", deadline.toString(Qt::ISODate)); 
                 settings.setValue("lastTime", line->text());
+
                 line->setText("00d 00h 00m 00s");
             }
             else 
@@ -248,37 +275,44 @@ void Timer::onClick()
     }
 }
 
-
-
-void Timer::saveOff()
-{
-    QSettings settings("acidhood", "Timer");
-    btn1->setText("OFF");
-    settings.setValue("timerActive", true);
-    settings.setValue("lastTime", line->text());
-}
-
 void Timer::settingsWindow()
 {
     setFixedSize(320, 150);
     setWindowTitle("Timer");
 }
 
+bool Timer::eventFilter(QObject* obj, QEvent* event)
+{
+    if (obj == line && event->type() == QEvent::KeyPress) 
+    {
+        keyPressEvent(static_cast<QKeyEvent*>(event));
+        return true; 
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
 
 
 void Timer::keyPressEvent(QKeyEvent* event)
 {
-    if (event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9)
+    QString digits = line->text().remove(QRegularExpression("\\D"));
+    while (digits.startsWith('0') && digits.length() > 0) 
     {
-        QString currentText = line->text();
-        onTextChanged(currentText + event->text());
+        digits.remove(0, 1);
     }
-    else if (event->key() == Qt::Key_Backspace) 
+
+    if (event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9) 
     {
-        QString digits = line->text().remove(QRegularExpression("\\D"));
-        if (!digits.isEmpty())
+        if (digits.length() < 8)
         {
-            digits.chop(1);
+            digits += event->text();
+            onTextChanged(digits);
+        }
+    }
+    else if (event->key() == Qt::Key_Backspace)
+    {
+        if (!digits.isEmpty()) 
+        {
+            digits.chop(1); 
             onTextChanged(digits);
         }
     }

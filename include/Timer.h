@@ -23,6 +23,9 @@
 #include <QDateTime>
 #include <QCoreApplication>
 #include <QDir>
+#include <QProcess>
+#include <QDebug>
+#include <QTimer>
 
 class Timer : public QMainWindow
 {

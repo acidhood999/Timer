@@ -20,6 +20,7 @@ public:
 private slots:
 
     void onClick(); 
+
     void onTextChanged(const QString& arg1);
 
 private:
@@ -34,6 +35,8 @@ private:
     QString hours;
     QMessageBox* msgBox = nullptr;
     int converttime = 0;
+
+    void saveOff();
 
     void settingsWindow();
 };

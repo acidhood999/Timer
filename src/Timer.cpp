@@ -6,6 +6,8 @@
 #include <string>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QSettings>
+#include <QDateTime>
 
 using namespace std;
 
@@ -34,6 +36,21 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
 
     line = new QLineEdit;
     line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    //
+
+    QSettings settings("acidhood", "Timer");
+
+   
+    bool isActive = settings.value("timerActive", false).toBool();
+
+    if (isActive)
+    {
+        btn1->setText("OFF");
+        QString savedTime = settings.value("lastTime", "00d 00h 00m 00s").toString();
+        line->setText(savedTime);
+    }
+    else btn1->setText("ON");
+
     //
     QFont font = QApplication::font();
     font.setPointSize(14);
@@ -89,7 +106,36 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     //
     connect(line, &QLineEdit::textEdited, this, &Timer::onTextChanged);
     connect(btn1, &QPushButton::clicked, this, &Timer::onClick);
+
+
+
+
+    connect(btn2, &QPushButton::clicked, this, [this]() 
+    {
+        QString cmd = "shutdown /s /t " + QString::number(900);
+        if (system(cmd.toStdString().c_str()) == 0) saveOff();
+        else  QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+    });
+    connect(btn3, &QPushButton::clicked, this, [this]() 
+    {
+        QString cmd = "shutdown /s /t " + QString::number(1800);
+        if (system(cmd.toStdString().c_str()) == 0) saveOff();
+        else QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+    });
+    connect(btn4, &QPushButton::clicked, this, [this]()
+    {
+        QString cmd = "shutdown /s /t " + QString::number(3600);
+        if (system(cmd.toStdString().c_str()) == 0)  saveOff();
+        else QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+    });
+    connect(btn5, &QPushButton::clicked, this, [this]() 
+    {
+        QString cmd = "shutdown /s /t " + QString::number(7200);
+        if (system(cmd.toStdString().c_str()) == 0)   saveOff();
+        else QMessageBox::critical(this, "ERROR", "Failed to start timer!");
+    });
 }
+
 
 void Timer::onTextChanged(const QString& arg1)
 {
@@ -136,6 +182,7 @@ void Timer::onTextChanged(const QString& arg1)
 
 void Timer::onClick()
 {
+    QSettings settings("acidhood", "Timer");
     if (btn1->text() == "ON")
     {
        
@@ -155,6 +202,8 @@ void Timer::onClick()
             if (system(cmd.toStdString().c_str()) == 0) 
             {
                 btn1->setText("OFF");
+                settings.setValue("timerActive", true);
+                settings.setValue("lastTime", line->text());
             }
             else 
             {
@@ -171,12 +220,21 @@ void Timer::onClick()
         if (system("shutdown /a") == 0) 
         {
             btn1->setText("ON");
+            settings.setValue("timerActive", false);
         }
     }
 }
 
 Timer::~Timer()
 {}
+
+void Timer::saveOff()
+{
+    QSettings settings("acidhood", "Timer");
+    btn1->setText("OFF");
+    settings.setValue("timerActive", true);
+    settings.setValue("lastTime", line->text());
+}
 
 void Timer::settingsWindow()
 {

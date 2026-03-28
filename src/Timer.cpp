@@ -1,15 +1,5 @@
 #include "Timer.h"
-#include <QtWidgets/QApplication>
-#include <QRegularExpression>
-#include <QMessageBox>
-#include <iostream>
-#include <string>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QSettings>
-#include <QDateTime>
-#include <QCoreApplication>
-#include <QDir>
+
 
 using namespace std;
 
@@ -17,44 +7,60 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
 {
     widget = new QWidget(this);
     setCentralWidget(widget);
+
     settingsWindow();
-    QFont font("Consolas", 14);
+
+    QFont mainFont("Consolas", 12);
+    QFont timerFont("Consolas", 22, QFont::Bold);
 
     line = new QLineEdit(widget);
-    initializationButton(font);
-
-    line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    initializationButton(mainFont);
+    //
+    line->setFixedHeight(60);
+    line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     line->setReadOnly(true);
     line->setFocusPolicy(Qt::StrongFocus);
     line->installEventFilter(this);
-    line->setToolTip("Type numbers on your keyboard to set time");
-    line->setFont(font);
+    line->setFont(timerFont);
     line->setText("00d 00h 00m 00s");
     line->setAlignment(Qt::AlignCenter);
     line->setContextMenuPolicy(Qt::NoContextMenu);
     line->setStyleSheet(
-        "QLineEdit { border: 1px solid #bdc3c7; border-radius: 5px; padding: 2px 5px; color: gray; background: white; }"
-        "QLineEdit:focus { border: 2px solid #3498db; color: black; }"
+        "QLineEdit {"
+        "  border: 1px solid #E0E0E0;"
+        "  border-radius: 12px;"
+        "  color: #000000;"
+        "  background: #F8F9FA;"
+        "}"
+        "QLineEdit:focus {"
+        "  border: 1px solid #000000;"
+        "  background: #FFFFFF;"
+        "}"
     );
 
-    QGroupBox* group = new QGroupBox(widget);
-    group->setStyleSheet("QGroupBox { border: 1px solid gray; border-radius: 9px; margin-top: 10px; }");
-    QHBoxLayout* groupLayout = new QHBoxLayout(group);
+    QPointer <QGroupBox> group = new QGroupBox(widget);
+    group->setStyleSheet("border: none; margin: 0;");
+    QPointer <QHBoxLayout> groupLayout = new QHBoxLayout(group);
+    groupLayout->setContentsMargins(0, 0, 0, 0);
+    groupLayout->setSpacing(10);
     groupLayout->addWidget(line);
     groupLayout->addWidget(btn1);
 
+  
     layout = new QGridLayout(widget);
-    layout->setSpacing(10);
+    layout->setContentsMargins(15, 15, 15, 15); 
+    layout->setSpacing(8);                   
+    layout->setVerticalSpacing(5);
     layout->addWidget(group, 0, 0, 1, 5);
     layout->addWidget(btn2, 1, 0);
     layout->addWidget(btn3, 1, 1);
     layout->addWidget(btn4, 1, 2);
     layout->addWidget(btn5, 1, 3);
     layout->addWidget(btn6, 1, 4);
-    layout->setColumnStretch(0, 1);
-
 
     saveAction();
+
+    updateStyles();
 
     trayIcon = new QSystemTrayIcon(this);
     QIcon appIcon(":/new/prefix1/icon.ico");
@@ -63,8 +69,8 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     trayIcon->setToolTip("Timer");
     this->setWindowIcon(appIcon);
 
-    QMenu* trayMenu = new QMenu(this);
-    QAction* quitAction = new QAction("Exit", this);
+    QPointer <QMenu> trayMenu = new QMenu(this);
+    QPointer <QAction> quitAction = new QAction("Exit", this);
     connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
     trayMenu->addAction(quitAction);
     trayIcon->setContextMenu(trayMenu);
@@ -72,7 +78,7 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
 
     connect(trayIcon, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason)
     {
-        if (reason == QSystemTrayIcon::Trigger) {this->showNormal(); this->activateWindow(); }
+        if (reason == QSystemTrayIcon::Trigger) { this->showNormal(); this->activateWindow(); }
     });
     connect(line, &QLineEdit::textEdited, this, &Timer::onTextChanged);
     connect(btn1, &QPushButton::clicked, this, &Timer::onClick);
@@ -83,13 +89,8 @@ Timer::Timer(QWidget* parent) : QMainWindow(parent)
     setupPresetButton(btn5, "00d 01h 00m 00s");
     setupPresetButton(btn6, "00d 02h 00m 00s");
 
-    QSettings bootSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
-    QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
-    bootSettings.setValue("Timer", "\"" + appPath + "\"");
-
     this->setFocus();
 }
-
 
 void Timer::onTextChanged(const QString& arg1)
 {
@@ -137,33 +138,30 @@ void Timer::onClick()
     QSettings settings("acidhood", "Timer");
     if (btn1->text() == "ON")
     {
-       
         QString digits = line->text().remove(QRegularExpression("\\D"));
-
         long d = digits.mid(0, 2).toLong();
         long h = digits.mid(2, 2).toLong();
         long m = digits.mid(4, 2).toLong();
         long s = digits.mid(6, 2).toLong();
 
-  
         long totalSeconds = s + (m * 60) + (h * 3600) + (d * 86400);
 
         if (totalSeconds > 0)
         {
             QString cmd = "shutdown /s /t " + QString::number(totalSeconds);
-            if (system(cmd.toStdString().c_str()) == 0) 
+            if (system(cmd.toStdString().c_str()) == 0)
             {
                 btn1->setText("OFF");
+                updateStyles(); 
 
                 QDateTime deadline = QDateTime::currentDateTime().addSecs(totalSeconds);
-
                 settings.setValue("timerActive", true);
-                settings.setValue("deadline", deadline.toString(Qt::ISODate)); 
+                settings.setValue("deadline", deadline.toString(Qt::ISODate));
                 settings.setValue("lastTime", line->text());
 
                 line->setText("00d 00h 00m 00s");
             }
-            else 
+            else
             {
                 QMessageBox::critical(this, "ERROR", "Failed to start timer!");
             }
@@ -175,9 +173,10 @@ void Timer::onClick()
     }
     else
     {
-        if (system("shutdown /a") == 0) 
+        if (system("shutdown /a") == 0)
         {
             btn1->setText("ON");
+            updateStyles(); 
             settings.setValue("timerActive", false);
         }
     }
@@ -185,15 +184,15 @@ void Timer::onClick()
 
 void Timer::settingsWindow()
 {
-    setFixedSize(320, 150);
+    setFixedSize(380, 140); 
     setWindowTitle("Timer");
+    widget->setStyleSheet("background-color: #FFFFFF;");
 }
 
 void Timer::initializationButton(const QFont& font)
 {
     btn1 = new QPushButton("ON");
-    btn1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    btn1->setFixedWidth(50);
+    btn1->setFixedSize(70, 60);
 
     btn2 = new QPushButton("15m");
     btn3 = new QPushButton("30m");
@@ -202,11 +201,46 @@ void Timer::initializationButton(const QFont& font)
     btn6 = new QPushButton("2h");
 
     QList<QPushButton*> allButtons = { btn1, btn2, btn3, btn4, btn5, btn6 };
-    for (QPushButton* b : allButtons) 
+    for (QPushButton* b : allButtons)
     {
-        b->setFixedWidth(50);
         b->setFont(font);
         b->setFocusPolicy(Qt::NoFocus);
+        b->setCursor(Qt::PointingHandCursor);
+    }
+}
+
+void Timer::updateStyles()
+{
+
+    QString presetStyle = { "QPushButton { background-color: #F0F0F0; color: #555555; border: none; border-radius: 8px; padding: 8px; }"
+        "QPushButton:hover { background-color: #E8E8E8; color: #000000; }"
+        "QPushButton:pressed { background-color: #D0D0D0; }" };
+     
+
+    btn2->setStyleSheet(presetStyle);
+    btn3->setStyleSheet(presetStyle);
+    btn4->setStyleSheet(presetStyle);
+    btn5->setStyleSheet(presetStyle);
+    btn6->setStyleSheet(presetStyle);
+
+
+    if (btn1->text() == "ON") 
+    {
+        btn1->setStyleSheet(
+            "QPushButton {"
+            "  background-color: #000000; color: #FFFFFF; border-radius: 12px; font-weight: bold; font-size: 20px;"
+            "}"
+            "QPushButton:hover { background-color: #333333; }"
+        );
+    }
+    else
+    {
+        btn1->setStyleSheet(
+            "QPushButton {"
+            "  background-color: #FFFFFF; color: #FF3B30; border: 2px solid #FF3B30; border-radius: 12px; font-weight: bold; font-size: 20px;"
+            "}"
+            "QPushButton:hover { background-color: #FFF5F5; }"
+        );
     }
 }
 
@@ -223,6 +257,7 @@ void Timer::saveAction()
         if (deadline.isValid() && QDateTime::currentDateTime() < deadline) 
         {
             btn1->setText("OFF");
+            updateStyles();
             QString savedTime = settings.value("lastTime", "00d 00h 00m 00s").toString();
             line->setText(savedTime);
         }
@@ -230,12 +265,14 @@ void Timer::saveAction()
         {
             settings.setValue("timerActive", false);
             btn1->setText("ON");
+            updateStyles();
             line->setText("00d 00h 00m 00s");
         }
     }
     else 
     {
         btn1->setText("ON");
+        updateStyles();
     }
 }
 

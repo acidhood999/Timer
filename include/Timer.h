@@ -14,6 +14,15 @@
 #include <QMenu>
 #include <QCloseEvent>
 #include <QStyle>
+#include <QPointer>
+#include <QtWidgets/QApplication>
+#include <iostream>
+#include <QRegularExpression>
+#include <QGroupBox>
+#include <QSettings>
+#include <QDateTime>
+#include <QCoreApplication>
+#include <QDir>
 
 class Timer : public QMainWindow
 {
@@ -30,21 +39,20 @@ protected:
 private slots:
 
     void onClick(); 
-
     void onTextChanged(const QString& arg1);
 
 private:
-    QWidget* widget = nullptr;
-    QLineEdit* line = nullptr;
-    QPushButton* btn1 = nullptr;
-    QPushButton* btn2 = nullptr;
-    QPushButton* btn3 = nullptr;
-    QPushButton* btn4 = nullptr;
-    QPushButton* btn5 = nullptr;
-    QPushButton* btn6 = nullptr;
-    QGridLayout* layout = nullptr;
-    QMessageBox* msgBox = nullptr;
-    QSystemTrayIcon* trayIcon = nullptr;
+    QPointer<QWidget> widget = nullptr;
+    QPointer<QLineEdit> line = nullptr;
+    QPointer<QPushButton> btn1 = nullptr;
+    QPointer<QPushButton> btn2 = nullptr;
+    QPointer<QPushButton> btn3 = nullptr;
+    QPointer<QPushButton> btn4 = nullptr;
+    QPointer<QPushButton> btn5 = nullptr;
+    QPointer<QPushButton> btn6 = nullptr;
+    QPointer<QGridLayout> layout = nullptr;
+    QPointer<QMessageBox> msgBox = nullptr;
+    QPointer<QSystemTrayIcon> trayIcon = nullptr;
   
     QString hours;
    
@@ -53,4 +61,5 @@ private:
     void settingsWindow(); 
     void initializationButton(const QFont& font);
     void saveAction();
+    void updateStyles();
 };

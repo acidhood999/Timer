@@ -1,5 +1,4 @@
-#include <QtWidgets/QApplication>
-#include <iostream>
+
 #include "Timer.h"
 
 using namespace std;

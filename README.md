@@ -50,3 +50,5 @@ A lightweight Windows desktop application built with C++ and Qt6. It allows user
 
 ---
 *Created by [acidhood999](https://github.com/acidhood999)*
+
+### [Download](https://github.com/acidhood999/Timer/releases/download/v.1.1/Timer_v1.1_Win64.rar)
